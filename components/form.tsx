@@ -50,7 +50,7 @@ const ConversationForm = ({}) => {
 
   return (
     <div>
-      <Heading title="Ably Pub/Sub Rest" />
+      <Heading title="Ably Pub/Sub Rest Server" />
       <div className="mt-4 space-y-4">
         <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-sky-50">
           {messages.map((message: string, index: any) => (

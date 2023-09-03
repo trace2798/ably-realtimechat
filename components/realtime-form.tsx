@@ -34,6 +34,25 @@ const RealtimeForm = ({}) => {
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  useEffect(() => {
+    // Replace this line with your method of obtaining an authentication token on the client-side
+    // const token = await axios.get("/api/auth");
+    const ably: Ably.Types.RealtimePromise = configureAbly({
+      authUrl: "/api/auth",
+    });
+    const channel = ably.channels.get("my-channel");
+
+    // Subscribe to the channel
+    channel.subscribe((message: Ably.Types.Message) => {
+      setMessages((messages) => [...messages, message.data.text]);
+    });
+
+    return () => {
+      // Unsubscribe when the component unmounts
+      channel.unsubscribe();
+    };
+  }, []);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,54 +62,6 @@ const RealtimeForm = ({}) => {
 
   const isLoading = form.formState.isSubmitting;
 
-  //   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  //     try {
-  //       const token = await axios.post("/api/auth", values);
-  //       const ably: Ably.Types.RealtimePromise = configureAbly({
-  //         authUrl: token.toString(),
-  //       });
-  //       const channel = ably.channels.get("my-channel");
-  //       if (channel === null) return;
-  //       const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
-  //       channel.publish("my-channel", { text: message });
-  //       setMessages((messages) => [...messages, message]);
-  //       form.reset();
-
-  //       toast({
-  //         title: "Message Sent",
-  //       });
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast({
-  //         title: "Oops something went wrong",
-  //         variant: "destructive",
-  //       });
-  //     }
-  //   };
-  //   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  //     try {
-  //       const token = await axios.post("/api/auth", values);
-  //       const ably: Ably.Types.RealtimePromise = configureAbly({
-  //         authUrl: token.toString(),
-  //       });
-  //       const channel = ably.channels.get("my-channel");
-  //       if (channel === null) return;
-  //       const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
-  //       channel.publish("my-channel", { text: message });
-  //       setMessages((messages) => [...messages, message]);
-  //       form.reset();
-
-  //       toast({
-  //         title: "Message Sent",
-  //       });
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast({
-  //         title: "Oops something went wrong",
-  //         variant: "destructive",
-  //       });
-  //     }
-  //   };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Replace this line with your method of obtaining an authentication token on the client-side
@@ -102,7 +73,6 @@ const RealtimeForm = ({}) => {
       if (channel === null) return;
       const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
       channel.publish("my-channel", { text: message });
-      setMessages((messages) => [...messages, message]);
       form.reset();
 
       toast({
@@ -119,7 +89,7 @@ const RealtimeForm = ({}) => {
 
   return (
     <div>
-      <Heading title="Ably Pub/Sub Realtime" />
+      <Heading title="Ably Pub/Sub Realtime Client" />
       <div className="mt-4 space-y-4">
         <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-sky-50">
           {messages.map((message: string, index: any) => (

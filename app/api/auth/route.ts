@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
-    // const body = await req.json();
-    // console.log(body);
     const clientId = process.env.DEFAULT_CLIENT_ID || "NO_CLIENT_ID";
     const client = new Ably.Rest(process.env.ABLY_API_KEY!);
     const tokenRequestData = await client.auth.createTokenRequest({
