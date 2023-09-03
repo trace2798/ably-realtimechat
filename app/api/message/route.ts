@@ -5,7 +5,7 @@ import * as Ably from "ably/promises";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log(body);
+    // console.log(body);
     const message: { text: string } = body;
     const client = new Ably.Rest(process.env.ABLY_API_KEY!);
     const channel = client.channels.get("status-updates");
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     const response = await channel.publish("update-from-server", message);
-    console.log(response);
+    // console.log(response);
     return NextResponse.json(response);
   } catch (error) {
     return new NextResponse("Internal Error", { status: 500 });

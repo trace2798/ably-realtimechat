@@ -13,6 +13,7 @@ import { formSchema } from "./constants";
 import { ScrollArea } from "./ui/scroll-area";
 import * as Ably from "ably/promises";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 type Message = { text: string; isOwnMessage: boolean };
 
@@ -21,7 +22,7 @@ const RealtimeForm = ({}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const scrollRef = useRef<ElementRef<"div">>(null);
   const tabId = useRef(Math.floor(Math.random() * 100001).toString()).current;
-
+  const router = useRouter();
   useEffect(() => {
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
@@ -35,7 +36,7 @@ const RealtimeForm = ({}) => {
     // Subscribe to the channel
     channel.subscribe((message: Ably.Types.Message) => {
       // Check if the message was sent from the current tab
-      // console.log(message.data.tabId);
+      // // console.log(message.data.tabId);
       const isOwnMessage = message.data.tabId === tabId;
       setMessages((messages) => [
         ...messages,
@@ -140,6 +141,10 @@ const RealtimeForm = ({}) => {
             </form>
           </Form>
         </div>
+      </div>
+      <div className="flex mt-10 w-full justify-evenly">
+        <Button onClick={() => router.push("/")} variant="secondary">Home</Button>
+        <Button onClick={() => router.push("/server")} variant="secondary">server</Button>
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { formSchema } from "./constants";
 import { ScrollArea } from "./ui/scroll-area";
 import { configureAbly } from "@ably-labs/react-hooks";
 import * as Ably from "ably/promises";
+import { useRouter } from "next/navigation";
 
 type Message = { text: string; isOwnMessage: boolean };
 
@@ -21,7 +22,7 @@ const ConversationForm = ({}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const scrollRef = useRef<ElementRef<"div">>(null);
   const tabId = useRef(Math.floor(Math.random() * 100001).toString()).current;
-
+  const router = useRouter();
   useEffect(() => {
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
@@ -36,7 +37,7 @@ const ConversationForm = ({}) => {
     // }, []);
     channel.subscribe((message: Ably.Types.Message) => {
       // Check if the message was sent from the current tab
-      // console.log(message.data.tabId);
+      // // console.log(message.data.tabId);
       const isOwnMessage = message.data.tabId === tabId;
       setMessages((messages) => [
         ...messages,
@@ -61,7 +62,7 @@ const ConversationForm = ({}) => {
   // const onSubmit = async (values: z.infer<typeof formSchema>) => {
   //   try {
   //     const response = await axios.post("/api/message", values);
-  //     console.log(response);
+  //     // console.log(response);
   //     const requestData = JSON.parse(response.config.data);
   //     setMessages((messages) => [...messages, requestData.text]);
   //     form.reset();
@@ -146,6 +147,14 @@ const ConversationForm = ({}) => {
             </form>
           </Form>
         </div>
+      </div>
+      <div className="flex mt-10 w-full justify-evenly">
+        <Button onClick={() => router.push("/")} variant="secondary">
+          Home
+        </Button>
+        <Button onClick={() => router.push("/client")} variant="secondary">
+          Client
+        </Button>
       </div>
     </div>
   );
