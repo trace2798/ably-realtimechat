@@ -6,7 +6,7 @@ interface pageProps {}
 const page: FC<pageProps> = ({}) => {
   return (
     <>
-      <main className="min-h-screen w-full items-center justify-center flex">
+      <main className="min-h-screen w-full items-center justify-center flex px-5">
         <RealtimeForm />
       </main>
     </>
