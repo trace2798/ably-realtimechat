@@ -13,30 +13,20 @@ import { formSchema } from "./constants";
 import { ScrollArea } from "./ui/scroll-area";
 import * as Ably from "ably/promises";
 import axios from "axios";
-// configureAbly({
-//   key: process.env.ABLY_API_KEY,
-//   clientId: generateRandomId(),
-//   token: generateRandomId(),
-// });
 
-// function generateRandomId() {
-//   return (
-//     Math.random().toString(36).substring(2, 15) +
-//     Math.random().toString(36).substring(2, 15)
-//   );
-// }
+type Message = { text: string; isOwnMessage: boolean };
 
 const RealtimeForm = ({}) => {
   const { toast } = useToast();
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const scrollRef = useRef<ElementRef<"div">>(null);
+  const tabId = useRef(Math.floor(Math.random() * 100001).toString()).current;
+
   useEffect(() => {
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
   useEffect(() => {
-    // Replace this line with your method of obtaining an authentication token on the client-side
-    // const token = await axios.get("/api/auth");
     const ably: Ably.Types.RealtimePromise = configureAbly({
       authUrl: "/api/auth",
     });
@@ -44,7 +34,13 @@ const RealtimeForm = ({}) => {
 
     // Subscribe to the channel
     channel.subscribe((message: Ably.Types.Message) => {
-      setMessages((messages) => [...messages, message.data.text]);
+      // Check if the message was sent from the current tab
+      console.log(message.data.tabId);
+      const isOwnMessage = message.data.tabId === tabId;
+      setMessages((messages) => [
+        ...messages,
+        { text: message.data.text, isOwnMessage },
+      ]);
     });
 
     return () => {
@@ -71,8 +67,10 @@ const RealtimeForm = ({}) => {
       });
       const channel = ably.channels.get("my-channel");
       if (channel === null) return;
-      const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
-      channel.publish("my-channel", { text: message });
+      const messageText = `${
+        form.getValues().text
+      } @ ${new Date().toISOString()}`;
+      channel.publish("my-channel", { text: messageText, tabId });
       form.reset();
 
       toast({
@@ -92,10 +90,16 @@ const RealtimeForm = ({}) => {
       <Heading title="Ably Pub/Sub Realtime Client" />
       <div className="mt-4 space-y-4">
         <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-sky-50">
-          {messages.map((message: string, index: any) => (
+          {messages.map((message: Message, index: any) => (
             <div key={index} className="my-3">
-              <h1 className="p-1 px-3 rounded-lg bg-indigo-400 max-w-[150px] ml-2">
-                {message}
+              <h1
+                className={`p-1 px-3 rounded-lg max-w-[150px] ${
+                  message.isOwnMessage
+                    ? "ml-auto bg-indigo-400 mr-2"
+                    : "ml-2 bg-teal-500"
+                }`}
+              >
+                {message.text}
               </h1>
             </div>
           ))}
