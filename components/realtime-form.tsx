@@ -35,7 +35,7 @@ const RealtimeForm = ({}) => {
     // Subscribe to the channel
     channel.subscribe((message: Ably.Types.Message) => {
       // Check if the message was sent from the current tab
-      console.log(message.data.tabId);
+      // console.log(message.data.tabId);
       const isOwnMessage = message.data.tabId === tabId;
       setMessages((messages) => [
         ...messages,
@@ -67,9 +67,10 @@ const RealtimeForm = ({}) => {
       });
       const channel = ably.channels.get("my-channel");
       if (channel === null) return;
-      const messageText = `${
-        form.getValues().text
-      } @ ${new Date().toISOString()}`;
+      // const messageText = `${
+      //   form.getValues().text
+      // } @ ${new Date().toISOString()}`;
+      const messageText = `${form.getValues().text}`;
       channel.publish("my-channel", { text: messageText, tabId });
       form.reset();
 
