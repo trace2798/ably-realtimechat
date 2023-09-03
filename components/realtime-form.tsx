@@ -4,15 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { configureAbly, useChannel } from "@ably-labs/react-hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { formSchema } from "./constants";
 import { ScrollArea } from "./ui/scroll-area";
+import * as Ably from "ably/promises";
+import axios from "axios";
+// configureAbly({
+//   key: process.env.ABLY_API_KEY,
+//   clientId: generateRandomId(),
+//   token: generateRandomId(),
+// });
 
-const ConversationForm = ({}) => {
+// function generateRandomId() {
+//   return (
+//     Math.random().toString(36).substring(2, 15) +
+//     Math.random().toString(36).substring(2, 15)
+//   );
+// }
+
+const RealtimeForm = ({}) => {
   const { toast } = useToast();
   const [messages, setMessages] = useState<string[]>([]);
   const scrollRef = useRef<ElementRef<"div">>(null);
@@ -29,13 +43,68 @@ const ConversationForm = ({}) => {
 
   const isLoading = form.formState.isSubmitting;
 
+  //   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  //     try {
+  //       const token = await axios.post("/api/auth", values);
+  //       const ably: Ably.Types.RealtimePromise = configureAbly({
+  //         authUrl: token.toString(),
+  //       });
+  //       const channel = ably.channels.get("my-channel");
+  //       if (channel === null) return;
+  //       const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
+  //       channel.publish("my-channel", { text: message });
+  //       setMessages((messages) => [...messages, message]);
+  //       form.reset();
+
+  //       toast({
+  //         title: "Message Sent",
+  //       });
+  //     } catch (error) {
+  //       console.error(error);
+  //       toast({
+  //         title: "Oops something went wrong",
+  //         variant: "destructive",
+  //       });
+  //     }
+  //   };
+  //   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  //     try {
+  //       const token = await axios.post("/api/auth", values);
+  //       const ably: Ably.Types.RealtimePromise = configureAbly({
+  //         authUrl: token.toString(),
+  //       });
+  //       const channel = ably.channels.get("my-channel");
+  //       if (channel === null) return;
+  //       const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
+  //       channel.publish("my-channel", { text: message });
+  //       setMessages((messages) => [...messages, message]);
+  //       form.reset();
+
+  //       toast({
+  //         title: "Message Sent",
+  //       });
+  //     } catch (error) {
+  //       console.error(error);
+  //       toast({
+  //         title: "Oops something went wrong",
+  //         variant: "destructive",
+  //       });
+  //     }
+  //   };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axios.post("/api/message", values);
-      console.log(response);
-      const requestData = JSON.parse(response.config.data);
-      setMessages((messages) => [...messages, requestData.text]);
+      // Replace this line with your method of obtaining an authentication token on the client-side
+      const token = await axios.get("/api/auth");
+      const ably: Ably.Types.RealtimePromise = configureAbly({
+        authUrl: "/api/auth",
+      });
+      const channel = ably.channels.get("my-channel");
+      if (channel === null) return;
+      const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
+      channel.publish("my-channel", { text: message });
+      setMessages((messages) => [...messages, message]);
       form.reset();
+
       toast({
         title: "Message Sent",
       });
@@ -50,7 +119,7 @@ const ConversationForm = ({}) => {
 
   return (
     <div>
-      <Heading title="Ably Pub/Sub Rest" />
+      <Heading title="Ably Pub/Sub Realtime" />
       <div className="mt-4 space-y-4">
         <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-sky-50">
           {messages.map((message: string, index: any) => (
@@ -101,4 +170,4 @@ const ConversationForm = ({}) => {
   );
 };
 
-export default ConversationForm;
+export default RealtimeForm;
