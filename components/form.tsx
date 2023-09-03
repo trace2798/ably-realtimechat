@@ -1,5 +1,12 @@
 "use client";
-import { MouseEventHandler, MouseEvent, useEffect, useState } from "react";
+import {
+  MouseEventHandler,
+  MouseEvent,
+  useEffect,
+  useState,
+  useRef,
+  ElementRef,
+} from "react";
 
 import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
@@ -34,6 +41,10 @@ const ConversationForm = ({}) => {
   const { toast } = useToast();
   //   const [messages, setMessages] = useState<string>("A message");
   const [messages, setMessages] = useState<string[]>([]);
+  const scrollRef = useRef<ElementRef<"div">>(null);
+  useEffect(() => {
+    scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length]);
 
   const params = useParams();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,7 +53,6 @@ const ConversationForm = ({}) => {
       text: "",
     },
   });
-  
 
   const isLoading = form.formState.isSubmitting;
   //   const [channel, setChannel] =
@@ -66,7 +76,7 @@ const ConversationForm = ({}) => {
       //   const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
       //   channel.publish("update-from-client", { text: message });
       const requestData = JSON.parse(response.config.data);
-      setMessages((messages) => [...messages, requestData.text, ]);
+      setMessages((messages) => [...messages, requestData.text]);
       form.reset();
       toast({
         title: "Answer Generated",
@@ -89,7 +99,7 @@ const ConversationForm = ({}) => {
           <h1>No conversation started</h1>
         )}
         {/* <div className="flex flex-col-reverse gap-y-4">{messages}</div> */}
-        <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-neutral-200">
+        <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-sky-50">
           {messages.map((message: string, index: any) => (
             <div key={index} className="my-3">
               <h1 className="p-1 rounded-lg bg-indigo-400 max-w-[150px] ml-2">
@@ -97,6 +107,7 @@ const ConversationForm = ({}) => {
               </h1>
             </div>
           ))}
+          <div ref={scrollRef} />
         </ScrollArea>
       </div>
       <div className="mt-5">
