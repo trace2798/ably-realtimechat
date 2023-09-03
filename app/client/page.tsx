@@ -2,7 +2,9 @@ import RealtimeForm from "@/components/realtime-form";
 import { FC } from "react";
 
 interface pageProps {}
-
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 const page: FC<pageProps> = ({}) => {
   return (
     <>
