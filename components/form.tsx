@@ -11,14 +11,43 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { formSchema } from "./constants";
 import { ScrollArea } from "./ui/scroll-area";
+import { configureAbly } from "@ably-labs/react-hooks";
+import * as Ably from "ably/promises";
+
+type Message = { text: string; isOwnMessage: boolean };
 
 const ConversationForm = ({}) => {
   const { toast } = useToast();
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const scrollRef = useRef<ElementRef<"div">>(null);
+  const tabId = useRef(Math.floor(Math.random() * 100001).toString()).current;
+
   useEffect(() => {
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
+
+  useEffect(() => {
+    const ably = configureAbly({ authUrl: "/api/auth" });
+    const channel = ably.channels.get("status-updates");
+    //   channel.subscribe((message) => {
+    //     // handle incoming message
+    //     setMessages((messages) => [...messages, message.data.text]);
+    //   });
+    // }, []);
+    channel.subscribe((message: Ably.Types.Message) => {
+      // Check if the message was sent from the current tab
+      // console.log(message.data.tabId);
+      const isOwnMessage = message.data.tabId === tabId;
+      setMessages((messages) => [
+        ...messages,
+        { text: message.data.text, isOwnMessage },
+      ]);
+    });
+    return () => {
+      // Unsubscribe when the component unmounts
+      channel.unsubscribe();
+    };
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -29,12 +58,27 @@ const ConversationForm = ({}) => {
 
   const isLoading = form.formState.isSubmitting;
 
+  // const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  //   try {
+  //     const response = await axios.post("/api/message", values);
+  //     console.log(response);
+  //     const requestData = JSON.parse(response.config.data);
+  //     setMessages((messages) => [...messages, requestData.text]);
+  //     form.reset();
+  //     toast({
+  //       title: "Message Sent",
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast({
+  //       title: "Oops something went wrong",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axios.post("/api/message", values);
-      console.log(response);
-      const requestData = JSON.parse(response.config.data);
-      setMessages((messages) => [...messages, requestData.text]);
+      await axios.post("/api/message", { ...values, tabId });
       form.reset();
       toast({
         title: "Message Sent",
@@ -53,10 +97,16 @@ const ConversationForm = ({}) => {
       <Heading title="Ably Pub/Sub Rest Server" />
       <div className="mt-4 space-y-4">
         <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-sky-50">
-          {messages.map((message: string, index: any) => (
+          {messages.map((message: Message, index: any) => (
             <div key={index} className="my-3">
-              <h1 className="p-1 px-3 rounded-lg bg-indigo-400 max-w-[150px] ml-2">
-                {message}
+              <h1
+                className={`p-1 px-3 rounded-lg max-w-[150px] ${
+                  message.isOwnMessage
+                    ? "ml-auto bg-indigo-400 mr-2"
+                    : "ml-2 bg-teal-500"
+                }`}
+              >
+                {message.text}
               </h1>
             </div>
           ))}
