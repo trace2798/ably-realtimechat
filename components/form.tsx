@@ -1,52 +1,25 @@
 "use client";
-import {
-  MouseEventHandler,
-  MouseEvent,
-  useEffect,
-  useState,
-  useRef,
-  ElementRef,
-} from "react";
-
-import axios, { AxiosError } from "axios";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-// import { toast } from "react-hot-toast";
-import { useParams, useRouter } from "next/navigation";
-// import { ChatCompletionRequestMessage } from "openai";
-
 import { Heading } from "@/components/heading";
-import { Loader } from "@/components/loader";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { ElementRef, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { formSchema } from "./constants";
-import { configureAbly } from "@ably-labs/react-hooks";
-import * as Ably from "ably/promises";
 import { ScrollArea } from "./ui/scroll-area";
 
 const ConversationForm = ({}) => {
-  const router = useRouter();
   const { toast } = useToast();
-  //   const [messages, setMessages] = useState<string>("A message");
   const [messages, setMessages] = useState<string[]>([]);
   const scrollRef = useRef<ElementRef<"div">>(null);
   useEffect(() => {
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
-  const params = useParams();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,32 +28,16 @@ const ConversationForm = ({}) => {
   });
 
   const isLoading = form.formState.isSubmitting;
-  //   const [channel, setChannel] =
-  //     useState<Ably.Types.RealtimeChannelPromise | null>(null);
-
-  //   useEffect(() => {
-  //     const ably: Ably.Types.RealtimePromise = configureAbly({
-  //       key: process.env.ABLY_API_KEY,
-  //       clientId: generateRandomId(),
-  //       token: generateRandomId(),
-  //     });
-  //     const _channel = ably.channels.get("status-updates");
-  //     setChannel(_channel);
-  //   }, []);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      //   if (channel === null) return;
       const response = await axios.post("/api/message", values);
       console.log(response);
-      //   const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
-      //   channel.publish("update-from-client", { text: message });
       const requestData = JSON.parse(response.config.data);
       setMessages((messages) => [...messages, requestData.text]);
       form.reset();
       toast({
-        title: "Answer Generated",
-        description: "Answer for your question has been generated",
+        title: "Message Sent",
       });
     } catch (error) {
       console.error(error);
@@ -95,14 +52,10 @@ const ConversationForm = ({}) => {
     <div>
       <Heading title="Ably Pub/Sub" />
       <div className="mt-4 space-y-4">
-        {messages.length === 0 && !isLoading && (
-          <h1>No conversation started</h1>
-        )}
-        {/* <div className="flex flex-col-reverse gap-y-4">{messages}</div> */}
         <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-sky-50">
           {messages.map((message: string, index: any) => (
             <div key={index} className="my-3">
-              <h1 className="p-1 rounded-lg bg-indigo-400 max-w-[150px] ml-2">
+              <h1 className="p-1 px-3 rounded-lg bg-indigo-400 max-w-[150px] ml-2">
                 {message}
               </h1>
             </div>
