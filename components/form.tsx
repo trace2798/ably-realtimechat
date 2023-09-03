@@ -27,6 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema } from "./constants";
 import { configureAbly } from "@ably-labs/react-hooks";
 import * as Ably from "ably/promises";
+import { ScrollArea } from "./ui/scroll-area";
 
 const ConversationForm = ({}) => {
   const router = useRouter();
@@ -41,6 +42,7 @@ const ConversationForm = ({}) => {
       text: "",
     },
   });
+  
 
   const isLoading = form.formState.isSubmitting;
   //   const [channel, setChannel] =
@@ -64,10 +66,7 @@ const ConversationForm = ({}) => {
       //   const message = `${form.getValues().text} @ ${new Date().toISOString()}`;
       //   channel.publish("update-from-client", { text: message });
       const requestData = JSON.parse(response.config.data);
-      setMessages((messages) => [requestData.text, ...messages]);
-
-      //   console.log(response.config.data);
-      //   setMessages((messages) => [...messages, response.config.data]);
+      setMessages((messages) => [...messages, requestData.text, ]);
       form.reset();
       toast({
         title: "Answer Generated",
@@ -90,18 +89,22 @@ const ConversationForm = ({}) => {
           <h1>No conversation started</h1>
         )}
         {/* <div className="flex flex-col-reverse gap-y-4">{messages}</div> */}
-        <div className="flex flex-col-reverse gap-y-4">
+        <ScrollArea className="h-[300px] rounded-md border flex flex-col-reverse py-5 bg-neutral-200">
           {messages.map((message: string, index: any) => (
-            <div key={index}>{message}</div>
+            <div key={index} className="my-3">
+              <h1 className="p-1 rounded-lg bg-indigo-400 max-w-[150px] ml-2">
+                {message}
+              </h1>
+            </div>
           ))}
-        </div>
+        </ScrollArea>
       </div>
-      <div className="px-4 lg:px-8">
+      <div className="mt-5">
         <div>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="grid w-full grid-cols-12 gap-2 p-4 px-3 border rounded-lg md:px-6 focus-within:shadow-sm"
+              className="grid w-full grid-cols-12 gap-2 p-2 px-3 border rounded-lg md:px-6 focus-within:shadow-sm"
             >
               <FormField
                 name="text"
