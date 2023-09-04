@@ -29,7 +29,7 @@ const RealtimeForm = ({}) => {
 
   useEffect(() => {
     const ably: Ably.Types.RealtimePromise = configureAbly({
-      authUrl: "/api/auth",
+      key: process.env.ABLY_API_KEY,
     });
     const channel = ably.channels.get("my-channel");
 
@@ -62,9 +62,12 @@ const RealtimeForm = ({}) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Replace this line with your method of obtaining an authentication token on the client-side
-      const token = await axios.get("/api/auth");
+      // const token = await axios.get("/api/auth");
+      // const ably: Ably.Types.RealtimePromise = configureAbly({
+      //   authUrl: "/api/auth",
+      // });
       const ably: Ably.Types.RealtimePromise = configureAbly({
-        authUrl: "/api/auth",
+        key: process.env.ABLY_API_KEY,
       });
       const channel = ably.channels.get("my-channel");
       if (channel === null) return;
@@ -143,8 +146,12 @@ const RealtimeForm = ({}) => {
         </div>
       </div>
       <div className="flex mt-10 w-full justify-evenly">
-        <Button onClick={() => router.push("/")} variant="secondary">Home</Button>
-        <Button onClick={() => router.push("/server")} variant="secondary">server</Button>
+        <Button onClick={() => router.push("/")} variant="secondary">
+          Home
+        </Button>
+        <Button onClick={() => router.push("/server")} variant="secondary">
+          server
+        </Button>
       </div>
     </div>
   );

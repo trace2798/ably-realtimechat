@@ -28,7 +28,7 @@ const ConversationForm = ({}) => {
   }, [messages.length]);
 
   useEffect(() => {
-    const ably = configureAbly({ authUrl: "/api/auth" });
+    const ably = configureAbly({ authUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth` });
     const channel = ably.channels.get("status-updates");
     //   channel.subscribe((message) => {
     //     // handle incoming message

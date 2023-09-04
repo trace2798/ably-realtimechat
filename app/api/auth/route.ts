@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     const tokenRequestData = await client.auth.createTokenRequest({
       clientId: clientId,
     });
-    // console.log(tokenRequestData);
+    console.log(tokenRequestData);
     return NextResponse.json(tokenRequestData);
   } catch (error) {
     return new NextResponse("Internal Error", { status: 500 });
