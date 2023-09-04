@@ -28,9 +28,10 @@ const RealtimeForm = ({}) => {
   }, [messages.length]);
 
   useEffect(() => {
-    const ably: Ably.Types.RealtimePromise = configureAbly({
-      authUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth`,
-    });
+    // const ably: Ably.Types.RealtimePromise = configureAbly({
+    //   authUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth`,
+    // });
+    const ably = new Ably.Realtime({ key: process.env.ABLY_API_KEY });
     const channel = ably.channels.get("my-channel");
 
     // Subscribe to the channel
@@ -63,9 +64,10 @@ const RealtimeForm = ({}) => {
     try {
       // Replace this line with your method of obtaining an authentication token on the client-side
       // const token = await axios.get("/api/auth");
-      const ably: Ably.Types.RealtimePromise = configureAbly({
-        authUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth`,
-      });
+      // const ably: Ably.Types.RealtimePromise = configureAbly({
+      //   authUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth`,
+      // });
+      const ably = new Ably.Realtime({ key: process.env.ABLY_API_KEY });
       // const ably: Ably.Types.RealtimePromise = configureAbly({
       //   key: process.env.ABLY_API_KEY,
       // });
