@@ -28,7 +28,10 @@ const ConversationForm = ({}) => {
   }, [messages.length]);
 
   useEffect(() => {
-    const ably = configureAbly({ authUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth` });
+    const ably = configureAbly({
+      authUrl: `/api/auth`,
+      queryTime: true,
+    });
     // const ably =  new Ably.Realtime({ key: process.env.ABLY_API_KEY });
     const channel = ably.channels.get("status-updates");
     //   channel.subscribe((message) => {

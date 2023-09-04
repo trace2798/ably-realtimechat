@@ -29,7 +29,8 @@ const RealtimeForm = ({}) => {
 
   useEffect(() => {
     const ably: Ably.Types.RealtimePromise = configureAbly({
-      authUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth`,
+      authUrl: `/api/auth`,
+      queryTime: true,
     });
     // const ably =  new Ably.Realtime({ key: process.env.ABLY_API_KEY });
     const channel = ably.channels.get("my-channel");
