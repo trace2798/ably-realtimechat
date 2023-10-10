@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import * as Ably from "ably/promises";
 
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
